@@ -11,7 +11,7 @@ def load_img(image_file):
     return tf.io.read_file(image_file)
 
 def img_to_array(image_raw):
-    return tf.image.decode_image(image_raw)
+    return tf.image.decode_image(image_raw).numpy()
 
 def person_to_img(file_names):
     cam_path_to_img = {}
@@ -48,19 +48,23 @@ def combine_cam_files(pids1, pids2):
     return d
 
 def get_batch(d_combination, cam_img_dict):
-    pairs_labels = []
-    i = 0
-    for key, value in d_combination.items():
-        if i % 2 == 0:
-            t = ((0, *key), (1, *random.choice(value)), 1.)
-        else:
-            t = ((0, *key), (1, *random.choice(value)), 0.)
-        i += 1
-        pairs_labels.append(t)
-    train_data = pairs_labels
+    def pairs_labels():
+        i = 0        
+        for key, value in d_combination.items():
+            if i % 2 == 0:
+                t = ((0, *key), (1, *random.choice(value)), 1.)
+            else:
+                t = ((0, *key), (1, *random.choice(value)), 0.)
+            i += 1
+            yield t
+            
+    train_data = list(pairs_labels())
+    
     X_a_train = np.array([cam_img_dict[x[0]] for x in train_data], dtype = np.float32)
     X_b_train = np.array([cam_img_dict[x[1]] for x in train_data], dtype = np.float32)
+    
     y_train = np.array([x[2] for x in train_data], dtype = np.float32)
+    
     return X_a_train, X_b_train, y_train
 
 # plot pics side by side
