@@ -2,6 +2,7 @@ import tensorflow as tf; print(tf.__version__)
 import numpy as np
 import os
 import random
+import cv2
 
 def load_img(image_file):
     return tf.io.read_file(image_file)
@@ -45,6 +46,11 @@ def data_generator(data_folder, dataset_size=1000):
     cams = [0, 1]
     X_data = []
     Y_data = []
+    
+    anchor_imgs = []
+    pos_imgs = []
+    neg_imgs = []
+    
     for _ in range(dataset_size):
         person = random.choice(persons)
         nperson = get_negative(person, persons)
@@ -56,19 +62,24 @@ def data_generator(data_folder, dataset_size=1000):
         anchor_img = choose_file(cam[person][anchor_person])
         pos_img = choose_file(cam[person][pos_person], anchor_img)
         neg_img = choose_file(cam[nperson][neg_person])
+       
+        anchor_img = cv2.imread(anchor_img)/255.
+        pos_img = cv2.imread(pos_img)/255.
+        neg_img = cv2.imread(neg_img)/255.
         
-        anchor_img = load_img(cam[person][anchor_person])
-        pos_img = load_img(cam[person][pos_person], anchor_img)
-        neg_img = load_img(cam[nperson][neg_person])
+        anchor_img = anchor_img[:, :, ::-1]
+        pos_img = pos_img[:, :, ::-1]
+        neg_img = neg_img[:, :, ::-1]
         
-        anchor_img = img_to_array(cam[person][anchor_person])
-        pos_img = img_to_array(cam[person][pos_person], anchor_img)
-        neg_img = img_to_array(cam[nperson][neg_person])
+        anchor_imgs.append(anchor_img)
+        pos_imgs.append(pos_img)
+        neg_imgs.append(neg_img)
         
-        X_data.append([anchor_img, pos_img, neg_img])
         Y_data.append([person, nperson])
-    return np.array(X_data), np.array(Y_data)
-
+    
+    X_data = [np.array(anchor_imgs), np.array(pos_imgs), np.array(neg_imgs)]
+#     X_data = [anchor_imgs, pos_imgs, neg_imgs]
+    return X_data, np.array(Y_data)
 
 # train_data_path = './datasets/airport-alunos/treino/'
 # X_data, y_data = data_generator(train_data_path, dataset_size=2)
