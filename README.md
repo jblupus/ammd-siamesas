@@ -6,7 +6,7 @@ The purpose of this paper is to make an intelligent model that can re-identify p
 
 To do this, we are using a TripletLoss Siamese network to transform images into Embeddings of size 64 and verify the similarity between two instances.
 
-## Archtecture
+## Architecture
 
 We are using a neural network with three inputs, each one is an image with shape (128, 64, 3). All them are passed to a commom CNN with following archtecture:
 
