@@ -8,7 +8,7 @@ def load_img(image_file):
     return tf.io.read_file(image_file)
 
 def img_to_array(image_raw):
-    return tf.image.decode_image(image_raw).numpy()
+    return tf.image.decode_image(image_raw).numpy()/255.
 
 def list_cam_files(cam_files_path):
     return [filename for filename in os.listdir(cam_files_path) if '.' not in filename]
